@@ -1,3 +1,3 @@
-module github.com/uniswap-auto
+module github.com/hirokimoto/uniswap-auto
 
 go 1.17
