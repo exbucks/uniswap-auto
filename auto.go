@@ -68,9 +68,34 @@ func main() {
 	        }
 	    `,
 	}
+	tradesQuery := map[string]string{
+		"query": `
+			query swaps {
+				swaps(orderBy: timestamp, orderDirection: desc, where:
+					{ pair: "0x7a99822968410431edd1ee75dab78866e31caf39" }
+				   ) {
+						pair {
+						  token0 {
+							symbol
+						  }
+						  token1 {
+							symbol
+						  }
+						}
+						amount0In
+						amount0Out
+						amount1In
+						amount1Out
+						amountUSD
+						to
+					}
+			}
+	    `,
+	}
 
 	c1 := make(chan string)
 	c2 := make(chan string)
+	c3 := make(chan string)
 
 	go func() {
 		for {
@@ -82,6 +107,13 @@ func main() {
 	go func() {
 		for {
 			gql(xiQuery, c2)
+			time.Sleep(time.Second * 3)
+		}
+	}()
+
+	go func() {
+		for {
+			gql(tradesQuery, c3)
 			time.Sleep(time.Second * 3)
 		}
 	}()
@@ -98,6 +130,8 @@ func main() {
 			case msg2 := <-c2:
 				json.Unmarshal([]byte(msg2), &xi)
 				show(eth, xi)
+			case msg3 := <-c3:
+				fmt.Println(msg3)
 			}
 		}
 	}()
