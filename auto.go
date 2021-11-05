@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
-type Bundles struct {
+type Crypto struct {
 	Data struct {
 		Bundles []struct {
 			EthPrice string `json:"ethPrice"`
@@ -37,6 +38,14 @@ func gql(query map[string]string, target chan string) {
 	}
 	data, _ := ioutil.ReadAll(response.Body)
 	target <- string(data)
+}
+
+func show(eth Crypto, tokens Tokens) {
+	unit, err1 := strconv.ParseFloat(eth.Data.Bundles[0].EthPrice, 32)
+	amount, err2 := strconv.ParseFloat(tokens.Data.Tokens[0].DerivedETH, 32)
+	if err1 != nil && err2 != nil {
+		fmt.Println(unit * amount)
+	}
 }
 
 func main() {
@@ -77,7 +86,7 @@ func main() {
 		}
 	}()
 
-	var eth Bundles
+	var eth Crypto
 	var xi Tokens
 
 	go func() {
@@ -85,10 +94,10 @@ func main() {
 			select {
 			case msg1 := <-c1:
 				json.Unmarshal([]byte(msg1), &eth)
-				fmt.Println(eth.Data.Bundles[0].EthPrice)
+				show(eth, xi)
 			case msg2 := <-c2:
 				json.Unmarshal([]byte(msg2), &xi)
-				fmt.Println(xi.Data.Tokens[0].DerivedETH)
+				show(eth, xi)
 			}
 		}
 	}()
