@@ -9,6 +9,23 @@ import (
 	"time"
 )
 
+type Bundles struct {
+	Data struct {
+		Bundles []struct {
+			EthPrice float64 `json:"ethPrice"`
+		} `json:"bundles"`
+	} `json:"data"`
+}
+
+type Tokens struct {
+	Data struct {
+		Tokens []struct {
+			DerivedETH     float64 `json:"derivedETH"`
+			TotalLiquidity int64   `json:"totalLiquidity"`
+		} `json:"tokens"`
+	} `json:"data"`
+}
+
 func gql(query map[string]string, target chan string) {
 	jsonQuery, _ := json.Marshal(query)
 	request, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonQuery))
@@ -61,12 +78,17 @@ func main() {
 		}
 	}()
 
+	var eth Bundles
+	var xi Tokens
+
 	go func() {
 		for {
 			select {
 			case msg1 := <-c1:
-				fmt.Println(msg1)
+				json.Unmarshal([]byte(msg1), &eth)
+				fmt.Println(eth)
 			case msg2 := <-c2:
+				json.Unmarshal([]byte(msg2), &xi)
 				fmt.Println(msg2)
 			}
 		}
