@@ -27,6 +27,29 @@ type Tokens struct {
 	} `json:"data"`
 }
 
+type Swaps struct {
+	Data struct {
+		Swaps []struct {
+			Amount0In  string `json:"amount0In"`
+			Amount0Out string `json:"amount0Out"`
+			Amount1In  string `json:"amount1In"`
+			Amount1Out string `json:"amount1Out"`
+			AmountUSD  string `json:"amountUSD"`
+			Id         string `json:"id"`
+			Pair       struct {
+				Token0 struct {
+					Symbol string `json:"symbol"`
+				} `json:"token0"`
+				Token1 struct {
+					Symbol string `json:"symbol"`
+				} `json:"token1"`
+			} `json:"pair"`
+			Timestamp string `json:"timestamp"`
+			To        string `json:"to"`
+		}
+	}
+}
+
 func gql(query map[string]string, target chan string) {
 	jsonQuery, _ := json.Marshal(query)
 	request, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonQuery))
