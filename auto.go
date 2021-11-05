@@ -12,7 +12,7 @@ import (
 type Bundles struct {
 	Data struct {
 		Bundles []struct {
-			EthPrice float64 `json:"ethPrice"`
+			EthPrice string `json:"ethPrice"`
 		} `json:"bundles"`
 	} `json:"data"`
 }
@@ -20,8 +20,8 @@ type Bundles struct {
 type Tokens struct {
 	Data struct {
 		Tokens []struct {
-			DerivedETH     float64 `json:"derivedETH"`
-			TotalLiquidity int64   `json:"totalLiquidity"`
+			DerivedETH     string `json:"derivedETH"`
+			TotalLiquidity string `json:"totalLiquidity"`
 		} `json:"tokens"`
 	} `json:"data"`
 }
@@ -36,8 +36,8 @@ func gql(query map[string]string, target chan string) {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 	}
 	data, _ := ioutil.ReadAll(response.Body)
-	fmt.Println(string(data))
 	target <- string(data)
+	fmt.Println(string(data))
 }
 
 func main() {
@@ -85,11 +85,14 @@ func main() {
 		for {
 			select {
 			case msg1 := <-c1:
-				json.Unmarshal([]byte(msg1), &eth)
+				err := json.Unmarshal([]byte(msg1), &eth)
+				if err != nil {
+					println(err.Error())
+				}
 				fmt.Println(eth)
 			case msg2 := <-c2:
 				json.Unmarshal([]byte(msg2), &xi)
-				fmt.Println(msg2)
+				fmt.Println(xi)
 			}
 		}
 	}()
