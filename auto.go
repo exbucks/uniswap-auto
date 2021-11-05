@@ -41,9 +41,9 @@ func gql(query map[string]string, target chan string) {
 }
 
 func show(eth Crypto, tokens Tokens) {
-	unit, err1 := strconv.ParseFloat(eth.Data.Bundles[0].EthPrice, 32)
-	amount, err2 := strconv.ParseFloat(tokens.Data.Tokens[0].DerivedETH, 32)
-	if err1 != nil && err2 != nil {
+	if eth.Data.Bundles != nil && tokens.Data.Tokens != nil {
+		unit, _ := strconv.ParseFloat(eth.Data.Bundles[0].EthPrice, 32)
+		amount, _ := strconv.ParseFloat(tokens.Data.Tokens[0].DerivedETH, 32)
 		fmt.Println(unit * amount)
 	}
 }
