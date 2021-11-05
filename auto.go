@@ -9,31 +9,35 @@ import (
 	"github.com/hirokimoto/uniswap-auto/utils"
 )
 
+func ethQuery(target chan string) {
+	for {
+		utils.ETHQuery(target)
+		time.Sleep(time.Second * 2)
+	}
+}
+
+func xiQuery(target chan string) {
+	for {
+		utils.XIQuery(target)
+		time.Sleep(time.Second * 3)
+	}
+}
+
+func tradesQuery(target chan string) {
+	for {
+		utils.TradesQuery(target)
+		time.Sleep(time.Second * 3)
+	}
+}
+
 func main() {
 	c1 := make(chan string)
 	c2 := make(chan string)
 	c3 := make(chan string)
 
-	go func() {
-		for {
-			utils.ETHQuery(c1)
-			time.Sleep(time.Second * 2)
-		}
-	}()
-
-	go func() {
-		for {
-			utils.XIQuery(c2)
-			time.Sleep(time.Second * 3)
-		}
-	}()
-
-	go func() {
-		for {
-			utils.TradesQuery(c3)
-			time.Sleep(time.Second * 3)
-		}
-	}()
+	go ethQuery(c1)
+	go xiQuery(c2)
+	go tradesQuery(c3)
 
 	var eth utils.Crypto
 	var xi utils.Tokens
@@ -50,7 +54,9 @@ func main() {
 				services.Price(eth, xi)
 			case msg3 := <-c3:
 				json.Unmarshal([]byte(msg3), &swaps)
-				fmt.Println(msg3)
+				min, max := services.MinAndMax(swaps)
+				fmt.Println("Min: ", min)
+				fmt.Println("Max: ", max)
 			}
 		}
 	}()

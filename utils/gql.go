@@ -110,6 +110,8 @@ func TradesQuery(target chan string) {
 						amount1Out
 						amountUSD
 						to
+						timestamp
+						id
 					}
 			}
 	    `,
