@@ -9,6 +9,20 @@ import (
 	"time"
 )
 
+func gql(query map[string]string, target chan string) {
+	jsonQuery, _ := json.Marshal(query)
+	request, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonQuery))
+	client := &http.Client{Timeout: time.Second * 10}
+	response, err := client.Do(request)
+	defer response.Body.Close()
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	}
+	data, _ := ioutil.ReadAll(response.Body)
+	fmt.Println(string(data))
+	target <- string(data)
+}
+
 func main() {
 	ethQuery := map[string]string{
 		"query": `
@@ -29,20 +43,35 @@ func main() {
 	        }
 	    `,
 	}
-	jsonETH, _ := json.Marshal(ethQuery)
-	jsonXI, _ := json.Marshal(xiQuery)
-	requestETH, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonETH))
-	requestXI, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonXI))
-	client := &http.Client{Timeout: time.Second * 10}
-	responseETH, err := client.Do(requestETH)
-	responseXI, err := client.Do(requestXI)
-	defer responseETH.Body.Close()
-	defer requestXI.Body.Close()
-	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	}
-	dataETH, _ := ioutil.ReadAll(responseETH.Body)
-	dataXI, _ := ioutil.ReadAll(responseXI.Body)
-	fmt.Println(string(dataETH))
-	fmt.Println((string(dataXI)))
+
+	c1 := make(chan string)
+	c2 := make(chan string)
+
+	go func() {
+		for {
+			gql(ethQuery, c1)
+			time.Sleep(time.Second * 2)
+		}
+	}()
+
+	go func() {
+		for {
+			gql(xiQuery, c2)
+			time.Sleep(time.Second * 3)
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case msg1 := <-c1:
+				fmt.Println(msg1)
+			case msg2 := <-c2:
+				fmt.Println(msg2)
+			}
+		}
+	}()
+
+	var input string
+	fmt.Scanln(&input)
 }
