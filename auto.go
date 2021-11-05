@@ -71,6 +71,10 @@ func calcPrice(eth Crypto, tokens Tokens) {
 	}
 }
 
+func calcTradable(swaps Swaps) {
+
+}
+
 func main() {
 	ethQuery := map[string]string{
 		"query": `
@@ -143,6 +147,7 @@ func main() {
 
 	var eth Crypto
 	var xi Tokens
+	var swaps Swaps
 
 	go func() {
 		for {
@@ -154,6 +159,8 @@ func main() {
 				json.Unmarshal([]byte(msg2), &xi)
 				calcPrice(eth, xi)
 			case msg3 := <-c3:
+				json.Unmarshal([]byte(msg3), &swaps)
+				calcTradable(swaps)
 				fmt.Println(msg3)
 			}
 		}
