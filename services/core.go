@@ -1,18 +1,32 @@
 package services
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/hirokimoto/uniswap-auto/utils"
 )
 
-func Price(eth utils.Crypto, tokens utils.Tokens) {
+func Price(eth utils.Crypto, tokens utils.Tokens) (price float64) {
 	if eth.Data.Bundles != nil && tokens.Data.Tokens != nil {
 		unit, _ := strconv.ParseFloat(eth.Data.Bundles[0].EthPrice, 32)
 		amount, _ := strconv.ParseFloat(tokens.Data.Tokens[0].DerivedETH, 32)
-		fmt.Println("Price: ", unit*amount)
+		price = unit * amount
 	}
+	return price
+}
+
+func LastPrice(swaps utils.Swaps) (last float64) {
+	item := swaps.Data.Swaps[0]
+	if item.Amount0In == "0" {
+		amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
+		amountOut, _ := strconv.ParseFloat(item.Amount0Out, 32)
+		last = amountUSD / amountOut
+	} else {
+		amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
+		amountOut, _ := strconv.ParseFloat(item.Amount0In, 32)
+		last = amountUSD / amountOut
+	}
+	return last
 }
 
 func MinAndMax(swaps utils.Swaps) (min float64, max float64, minTarget string, maxTarget string) {

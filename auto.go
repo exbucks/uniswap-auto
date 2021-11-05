@@ -48,13 +48,17 @@ func main() {
 			select {
 			case msg1 := <-c1:
 				json.Unmarshal([]byte(msg1), &eth)
-				services.Price(eth, xi)
+				price := services.Price(eth, xi)
+				fmt.Println("Current price: ", price)
 			case msg2 := <-c2:
 				json.Unmarshal([]byte(msg2), &xi)
-				services.Price(eth, xi)
+				price := services.Price(eth, xi)
+				fmt.Println("Current price: ", price)
 			case msg3 := <-c3:
 				json.Unmarshal([]byte(msg3), &swaps)
+				last := services.LastPrice(swaps)
 				min, max, minTarget, maxTarget := services.MinAndMax(swaps)
+				fmt.Println("Last price: ", last)
 				fmt.Println("Min: ", min, minTarget, "   Max: ", max, maxTarget)
 			}
 		}
