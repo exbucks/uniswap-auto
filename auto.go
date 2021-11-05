@@ -10,15 +10,15 @@ import (
 )
 
 func main() {
-	// ethPrice := map[string]string{
-	// 	"query": `
-	//         query bundles {
-	//             bundles(where: { id: "1" }) {
-	//                 ethPrice
-	//             }
-	//         }
-	//     `,
-	// }
+	ethQuery := map[string]string{
+		"query": `
+	        query bundles {
+	            bundles(where: { id: "1" }) {
+	                ethPrice
+	            }
+	        }
+	    `,
+	}
 	xiQuery := map[string]string{
 		"query": `
 	        query tokens {
@@ -29,14 +29,20 @@ func main() {
 	        }
 	    `,
 	}
-	jsonValue, _ := json.Marshal(xiQuery)
-	request, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonValue))
+	jsonETH, _ := json.Marshal(ethQuery)
+	jsonXI, _ := json.Marshal(xiQuery)
+	requestETH, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonETH))
+	requestXI, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonXI))
 	client := &http.Client{Timeout: time.Second * 10}
-	response, err := client.Do(request)
-	defer response.Body.Close()
+	responseETH, err := client.Do(requestETH)
+	responseXI, err := client.Do(requestXI)
+	defer responseETH.Body.Close()
+	defer requestXI.Body.Close()
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 	}
-	data, _ := ioutil.ReadAll(response.Body)
-	fmt.Println(string(data))
+	dataETH, _ := ioutil.ReadAll(responseETH.Body)
+	dataXI, _ := ioutil.ReadAll(responseXI.Body)
+	fmt.Println(string(dataETH))
+	fmt.Println((string(dataXI)))
 }
