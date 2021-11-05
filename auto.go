@@ -37,7 +37,6 @@ func gql(query map[string]string, target chan string) {
 	}
 	data, _ := ioutil.ReadAll(response.Body)
 	target <- string(data)
-	fmt.Println(string(data))
 }
 
 func main() {
@@ -85,14 +84,11 @@ func main() {
 		for {
 			select {
 			case msg1 := <-c1:
-				err := json.Unmarshal([]byte(msg1), &eth)
-				if err != nil {
-					println(err.Error())
-				}
-				fmt.Println(eth)
+				json.Unmarshal([]byte(msg1), &eth)
+				fmt.Println(eth.Data.Bundles[0].EthPrice)
 			case msg2 := <-c2:
 				json.Unmarshal([]byte(msg2), &xi)
-				fmt.Println(xi)
+				fmt.Println(xi.Data.Tokens[0].DerivedETH)
 			}
 		}
 	}()
