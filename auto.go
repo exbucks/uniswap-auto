@@ -29,7 +29,7 @@ type Tokens struct {
 func gql(query map[string]string, target chan string) {
 	jsonQuery, _ := json.Marshal(query)
 	request, err := http.NewRequest("POST", "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", bytes.NewBuffer(jsonQuery))
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: time.Second * 50}
 	response, err := client.Do(request)
 	defer response.Body.Close()
 	if err != nil {
