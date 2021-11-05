@@ -63,7 +63,7 @@ func gql(query map[string]string, target chan string) {
 	target <- string(data)
 }
 
-func show(eth Crypto, tokens Tokens) {
+func calcPrice(eth Crypto, tokens Tokens) {
 	if eth.Data.Bundles != nil && tokens.Data.Tokens != nil {
 		unit, _ := strconv.ParseFloat(eth.Data.Bundles[0].EthPrice, 32)
 		amount, _ := strconv.ParseFloat(tokens.Data.Tokens[0].DerivedETH, 32)
@@ -149,10 +149,10 @@ func main() {
 			select {
 			case msg1 := <-c1:
 				json.Unmarshal([]byte(msg1), &eth)
-				show(eth, xi)
+				calcPrice(eth, xi)
 			case msg2 := <-c2:
 				json.Unmarshal([]byte(msg2), &xi)
-				show(eth, xi)
+				calcPrice(eth, xi)
 			case msg3 := <-c3:
 				fmt.Println(msg3)
 			}
