@@ -44,6 +44,22 @@ type Swaps struct {
 	}
 }
 
+type Pairs struct {
+	Data struct {
+		Pairs []struct {
+			Id     string `json:"id"`
+			Token0 struct {
+				Symbol string `json:"symbol"`
+			} `json:"token0"`
+			Token1 struct {
+				Symbol string `json:"symbol"`
+			} `json:"token1"`
+			Token0Price string `json:"token0Price"`
+			Token1Price string `json:"token1Price"`
+		}
+	}
+}
+
 func Query(target string, id string) map[string]string {
 	var query map[string]string
 	switch target {
@@ -57,7 +73,6 @@ func Query(target string, id string) map[string]string {
 				}
 			`,
 		}
-		break
 	case "tokens":
 		sub := fmt.Sprintf(`
 			query tokens {
@@ -68,7 +83,6 @@ func Query(target string, id string) map[string]string {
 			}
 		`, id)
 		query = map[string]string{"query": sub}
-		break
 	case "swaps":
 		sub := fmt.Sprintf(`
 			query swaps {
@@ -95,7 +109,23 @@ func Query(target string, id string) map[string]string {
 			}
 		`, id)
 		query = map[string]string{"query": sub}
-		break
+	case "pairs":
+		sub := fmt.Sprintf(`
+			query pairs {
+				pairs(orderBy: reserveUSD, orderDirection: desc) {
+					id,
+					token0 {
+						symbol
+					},
+					token1 {
+						symbol
+					},
+					token0Price,
+					token1Price,
+				}
+			}
+		`, id)
+		query = map[string]string{"query": sub}
 	default:
 	}
 	return query

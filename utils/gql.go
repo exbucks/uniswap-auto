@@ -23,16 +23,6 @@ func request(query map[string]string, target chan string) {
 }
 
 func Post(target chan string, to string, id string) {
-	switch to {
-	case "bundles":
-		query := Query("bundles", "")
-		request(query, target)
-	case "tokens":
-		query := Query("tokens", id)
-		request(query, target)
-	case "swaps":
-		query := Query("swaps", id)
-		request(query, target)
-	default:
-	}
+	query := Query(to, id)
+	request(query, target)
 }
