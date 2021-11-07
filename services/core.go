@@ -35,11 +35,13 @@ func MinAndMax(swaps utils.Swaps) (
 	max float64,
 	minTarget string,
 	maxTarget string,
-	minTime int64,
-	maxTime int64,
+	minTime time.Time,
+	maxTime time.Time,
 ) {
 	min = 0
 	max = 0
+	var _min int64
+	var _max int64
 	for _, item := range swaps.Data.Swaps {
 		if item.Amount0In == "0" {
 			amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
@@ -51,11 +53,11 @@ func MinAndMax(swaps utils.Swaps) (
 			}
 			if price < min {
 				min = price
-				minTime, _ = strconv.ParseInt(item.Timestamp, 10, 64)
+				_min, _ = strconv.ParseInt(item.Timestamp, 10, 64)
 			}
 			if price > max {
 				max = price
-				maxTime, _ = strconv.ParseInt(item.Timestamp, 10, 64)
+				_max, _ = strconv.ParseInt(item.Timestamp, 10, 64)
 			}
 			minTarget = "BUY"
 			maxTarget = "BUY"
@@ -69,24 +71,26 @@ func MinAndMax(swaps utils.Swaps) (
 			}
 			if price < min {
 				min = price
-				minTime, _ = strconv.ParseInt(item.Timestamp, 10, 64)
+				_min, _ = strconv.ParseInt(item.Timestamp, 10, 64)
 			}
 			if price > max {
 				max = price
-				maxTime, _ = strconv.ParseInt(item.Timestamp, 10, 64)
+				_max, _ = strconv.ParseInt(item.Timestamp, 10, 64)
 			}
 			minTarget = "SELL"
 			maxTarget = "SELL"
 		}
 	}
+	minTime = time.Unix(_min, 0)
+	maxTime = time.Unix(_max, 0)
 	return min, max, minTarget, maxTarget, minTime, maxTime
 }
 
-func PeriodOfSwaps(swaps utils.Swaps) time.Duration {
+func PeriodOfSwaps(swaps utils.Swaps) (time.Time, time.Time, time.Duration) {
 	first, _ := strconv.ParseInt(swaps.Data.Swaps[0].Timestamp, 10, 64)
 	last, _ := strconv.ParseInt(swaps.Data.Swaps[len(swaps.Data.Swaps)-1].Timestamp, 10, 64)
 	tf := time.Unix(first, 0)
 	tl := time.Unix(last, 0)
 	period := tf.Sub(tl)
-	return period
+	return tl, tf, period
 }
