@@ -15,6 +15,9 @@ type Crypto struct {
 type Tokens struct {
 	Data struct {
 		Tokens []struct {
+			Id             string `json:"id"`
+			Name           string `json:"name"`
+			Symbol         string `json:"symbol"`
 			DerivedETH     string `json:"derivedETH"`
 			TotalLiquidity string `json:"totalLiquidity"`
 		} `json:"tokens"`
@@ -77,6 +80,9 @@ func Query(target string, id string) map[string]string {
 		sub := fmt.Sprintf(`
 			query tokens {
 				tokens(where: { id: %s }) {
+					id
+					name
+					symbol
 					derivedETH
 					totalLiquidity
 				}
