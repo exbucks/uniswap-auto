@@ -69,7 +69,7 @@ func main() {
 				fmt.Println("Max price: ", max, maxTarget, te)
 
 				period := services.PeriodOfSwaps(swaps)
-				fmt.Println(period)
+				fmt.Println("Timeframe of 100 swaps: ", period)
 			case msg4 := <-c4:
 				json.Unmarshal([]byte(msg4), &pairs)
 			}
