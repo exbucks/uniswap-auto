@@ -1,6 +1,8 @@
 package services
 
 import (
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -93,4 +95,32 @@ func PeriodOfSwaps(swaps utils.Swaps) (time.Time, time.Time, time.Duration) {
 	tl := time.Unix(last, 0)
 	period := tf.Sub(tl)
 	return tl, tf, period
+}
+
+func findToken(pings <-chan string) {
+	var swaps utils.Swaps
+	msg := <-pings
+	json.Unmarshal([]byte(msg), &swaps)
+	min, max, minTarget, maxTarget, minTime, maxTime := MinAndMax(swaps)
+
+	last := LastPrice(swaps)
+	// fmt.Println(msg)
+
+	ts, tl, period := PeriodOfSwaps(swaps)
+	if (max-min)/last > 0.01 && period < time.Duration(60*time.Minute) {
+		fmt.Println("$$$$$ This is a tradable token! $$$$$")
+		fmt.Println("Last price: ", last)
+		fmt.Println("Min price: ", min, minTarget, minTime)
+		fmt.Println("Max price: ", max, maxTarget, maxTime)
+		fmt.Println("Timeframe of 100 swaps: ", period)
+		fmt.Println("Start and End time of the above time frame: ", ts, tl)
+	}
+}
+
+func TradableTokens(pairs utils.Pairs) {
+	c := make(chan string, 1)
+	for _, item := range pairs.Data.Pairs {
+		go utils.Post(c, "swaps", item.Id)
+	}
+	findToken(c)
 }

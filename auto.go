@@ -18,25 +18,25 @@ func main() {
 	go func() {
 		for {
 			utils.Post(c1, "bundles", "")
-			time.Sleep(time.Second * 2)
+			time.Sleep(time.Second * 1)
 		}
 	}()
 	go func() {
 		for {
 			utils.Post(c2, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 1)
 		}
 	}()
 	go func() {
 		for {
 			utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 1)
 		}
 	}()
 	go func() {
 		for {
 			utils.Post(c4, "pairs", "")
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 1)
 		}
 	}()
 
@@ -69,8 +69,12 @@ func main() {
 				ts, tl, period := services.PeriodOfSwaps(swaps)
 				fmt.Println("Timeframe of 100 swaps: ", period)
 				fmt.Println("Start and End time of the above time frame: ", ts, tl)
+				if (max-min)/last > 0.5 {
+					fmt.Println("$$$$$ This is a tradable token! $$$$$")
+				}
 			case msg4 := <-c4:
 				json.Unmarshal([]byte(msg4), &pairs)
+				services.TradableTokens(pairs)
 			}
 		}
 	}()
