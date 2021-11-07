@@ -110,22 +110,23 @@ func Query(target string, id string) map[string]string {
 		`, id)
 		query = map[string]string{"query": sub}
 	case "pairs":
-		sub := fmt.Sprintf(`
-			query pairs {
-				pairs(orderBy: reserveUSD, orderDirection: desc) {
-					id,
-					token0 {
-						symbol
-					},
-					token1 {
-						symbol
-					},
-					token0Price,
-					token1Price,
+		query = map[string]string{
+			"query": `
+				query pairs {
+					pairs(orderBy: reserveUSD, orderDirection: desc) {
+						id,
+						token0 {
+							symbol
+						},
+						token1 {
+							symbol
+						},
+						token0Price,
+						token1Price,
+					}
 				}
-			}
-		`, id)
-		query = map[string]string{"query": sub}
+			`,
+		}
 	default:
 	}
 	return query
