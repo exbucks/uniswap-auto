@@ -57,7 +57,13 @@ func main() {
 			case msg3 := <-c3:
 				json.Unmarshal([]byte(msg3), &swaps)
 				last := services.LastPrice(swaps)
-				min, max, minTarget, maxTarget := services.MinAndMax(swaps)
+				min, max, minTarget, maxTarget, minTime, maxTime := services.MinAndMax(swaps)
+
+				ts := time.Unix(minTime, 0)
+				te := time.Unix(maxTime, 0)
+				fmt.Println(ts)
+				fmt.Println(te)
+
 				fmt.Println("Last price: ", last)
 				fmt.Println("Min: ", min, minTarget, "   Max: ", max, maxTarget)
 			}
