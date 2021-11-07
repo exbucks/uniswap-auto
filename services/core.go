@@ -2,6 +2,7 @@ package services
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/hirokimoto/uniswap-auto/utils"
 )
@@ -79,4 +80,13 @@ func MinAndMax(swaps utils.Swaps) (
 		}
 	}
 	return min, max, minTarget, maxTarget, minTime, maxTime
+}
+
+func PeriodOfSwaps(swaps utils.Swaps) time.Duration {
+	first, _ := strconv.ParseInt(swaps.Data.Swaps[0].Timestamp, 10, 64)
+	last, _ := strconv.ParseInt(swaps.Data.Swaps[len(swaps.Data.Swaps)-1].Timestamp, 10, 64)
+	tf := time.Unix(first, 0)
+	tl := time.Unix(last, 0)
+	period := tf.Sub(tl)
+	return period
 }
