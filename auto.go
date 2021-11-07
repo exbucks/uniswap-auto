@@ -11,21 +11,21 @@ import (
 
 func ethQuery(target chan string) {
 	for {
-		utils.ETHQuery(target)
+		utils.Post(target, "bundles", "")
 		time.Sleep(time.Second * 2)
 	}
 }
 
 func xiQuery(target chan string) {
 	for {
-		utils.XIQuery(target)
+		utils.Post(target, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
 		time.Sleep(time.Second * 3)
 	}
 }
 
 func tradesQuery(target chan string) {
 	for {
-		utils.TradesQuery(target)
+		utils.Post(target, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
 		time.Sleep(time.Second * 3)
 	}
 }

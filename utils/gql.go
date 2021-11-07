@@ -22,17 +22,17 @@ func request(query map[string]string, target chan string) {
 	target <- string(data)
 }
 
-func ETHQuery(target chan string) {
-	query := Query("bundles", "")
-	request(query, target)
-}
-
-func XIQuery(target chan string) {
-	query := Query("tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
-	request(query, target)
-}
-
-func TradesQuery(target chan string) {
-	query := Query("swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
-	request(query, target)
+func Post(target chan string, to string, id string) {
+	switch to {
+	case "bundles":
+		query := Query("bundles", "")
+		request(query, target)
+	case "tokens":
+		query := Query("tokens", id)
+		request(query, target)
+	case "swaps":
+		query := Query("swaps", id)
+		request(query, target)
+	default:
+	}
 }
