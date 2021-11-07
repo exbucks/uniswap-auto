@@ -61,11 +61,10 @@ func main() {
 
 				ts := time.Unix(minTime, 0)
 				te := time.Unix(maxTime, 0)
-				fmt.Println(ts)
-				fmt.Println(te)
 
 				fmt.Println("Last price: ", last)
-				fmt.Println("Min: ", min, minTarget, "   Max: ", max, maxTarget)
+				fmt.Println("Min price: ", min, minTarget, ts)
+				fmt.Println("Max price: ", max, maxTarget, te)
 			}
 		}
 	}()
