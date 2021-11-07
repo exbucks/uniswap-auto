@@ -73,7 +73,7 @@ func Query(target string, id string) map[string]string {
 		sub := fmt.Sprintf(`
 			query swaps {
 				swaps(orderBy: timestamp, orderDirection: desc, where:
-					{ pair: %s }
+					{ pair: "%s" }
 				) {
 					pair {
 						token0 {
