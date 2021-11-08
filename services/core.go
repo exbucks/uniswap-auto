@@ -21,16 +21,16 @@ func Price(eth utils.Crypto, tokens utils.Tokens) (price float64) {
 
 func LastPrice(swaps utils.Swaps) (last float64) {
 	item := swaps.Data.Swaps[0]
-	if item.Amount0In == "0" {
-		amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
-		amountOut, _ := strconv.ParseFloat(item.Amount0Out, 32)
-		last = amountUSD / amountOut
+	amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
+	amountToken, _ := strconv.ParseFloat(item.Amount1In, 32)
+	price, _ := strconv.ParseFloat(item.AmountUSD, 32)
+	if item.Amount0In == "0" && item.Amount1Out == "0" {
+		price = amountUSD / amountToken
 	} else {
-		amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
-		amountOut, _ := strconv.ParseFloat(item.Amount0In, 32)
-		last = amountUSD / amountOut
+		amountToken, _ = strconv.ParseFloat(item.Amount1Out, 32)
+		price = amountUSD / amountToken
 	}
-	return last
+	return price
 }
 
 func MinAndMax(swaps utils.Swaps) (
@@ -46,42 +46,30 @@ func MinAndMax(swaps utils.Swaps) (
 	var _min int64
 	var _max int64
 	for _, item := range swaps.Data.Swaps {
-		if item.Amount0In == "0" {
-			amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
-			amountOut, _ := strconv.ParseFloat(item.Amount0Out, 32)
-			price := amountUSD / amountOut
-			if min == 0 || max == 0 {
-				min = price
-				max = price
-			}
-			if price < min {
-				min = price
-				_min, _ = strconv.ParseInt(item.Timestamp, 10, 64)
-			}
-			if price > max {
-				max = price
-				_max, _ = strconv.ParseInt(item.Timestamp, 10, 64)
-			}
-			minTarget = "BUY"
-			maxTarget = "BUY"
-		} else {
-			amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
-			amountOut, _ := strconv.ParseFloat(item.Amount0In, 32)
-			price := amountUSD / amountOut
-			if min == 0 || max == 0 {
-				min = price
-				max = price
-			}
-			if price < min {
-				min = price
-				_min, _ = strconv.ParseInt(item.Timestamp, 10, 64)
-			}
-			if price > max {
-				max = price
-				_max, _ = strconv.ParseInt(item.Timestamp, 10, 64)
-			}
+		amountUSD, _ := strconv.ParseFloat(item.AmountUSD, 32)
+		amountToken, _ := strconv.ParseFloat(item.Amount1In, 32)
+		price, _ := strconv.ParseFloat(item.AmountUSD, 32)
+		if item.Amount0In == "0" && item.Amount1Out == "0" {
+			price = amountUSD / amountToken
 			minTarget = "SELL"
 			maxTarget = "SELL"
+		} else {
+			amountToken, _ = strconv.ParseFloat(item.Amount1Out, 32)
+			price = amountUSD / amountToken
+			minTarget = "BUY"
+			maxTarget = "BUY"
+		}
+		if min == 0 || max == 0 {
+			min = price
+			max = price
+		}
+		if price < min {
+			min = price
+			_min, _ = strconv.ParseInt(item.Timestamp, 10, 64)
+		}
+		if price > max {
+			max = price
+			_max, _ = strconv.ParseInt(item.Timestamp, 10, 64)
 		}
 	}
 	minTime = time.Unix(_min, 0)
@@ -118,6 +106,8 @@ func findToken(pings <-chan string, id string) {
 		fmt.Println("Max price: ", max, maxTarget, maxTime)
 		fmt.Println("Timeframe of 100 swaps: ", period)
 		fmt.Println("Start and End time of the above time frame: ", ts, tl)
+	} else {
+		fmt.Print(".")
 	}
 }
 
