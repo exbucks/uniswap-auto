@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/hirokimoto/uniswap-auto/services"
 	"github.com/hirokimoto/uniswap-auto/utils"
@@ -37,7 +36,6 @@ func main() {
 	go func() {
 		for {
 			utils.Post(c4, "pairs", "")
-			time.Sleep(time.Second * 5)
 		}
 	}()
 

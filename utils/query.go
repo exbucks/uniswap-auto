@@ -129,7 +129,7 @@ func Query(target string, id string) map[string]string {
 		query = map[string]string{
 			"query": `
 				query pairs {
-					pairs(orderBy: reserveUSD, orderDirection: desc) {
+					pairs(first: 1000, orderBy: reserveUSD, orderDirection: desc) {
 						id,
 						token0 {
 							symbol

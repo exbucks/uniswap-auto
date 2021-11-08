@@ -94,7 +94,7 @@ func findToken(pings <-chan string, id string) {
 
 	last := LastPrice(swaps)
 
-	ts, tl, period := PeriodOfSwaps(swaps)
+	_, _, period := PeriodOfSwaps(swaps)
 	if (max-min)/last > 0.1 && period < time.Duration(6*time.Hour) {
 		fmt.Println("$$$$$ This is a tradable token! $$$$$")
 		fmt.Println("Token ID:", id)
@@ -104,7 +104,12 @@ func findToken(pings <-chan string, id string) {
 		fmt.Println("Min price: ", min, minTarget, minTime)
 		fmt.Println("Max price: ", max, maxTarget, maxTime)
 		fmt.Println("Timeframe of 100 swaps: ", period)
-		fmt.Println("Start and End time of the above time frame: ", ts, tl)
+		status := maxTime.After(minTime)
+		if status {
+			fmt.Println("Status: Safe")
+		} else {
+			fmt.Println("Status: Dagerous")
+		}
 	} else {
 		fmt.Print(".")
 	}
