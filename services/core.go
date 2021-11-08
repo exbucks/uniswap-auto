@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hirokimoto/uniswap-auto/utils"
@@ -97,18 +98,21 @@ func PeriodOfSwaps(swaps utils.Swaps) (time.Time, time.Time, time.Duration) {
 	return tl, tf, period
 }
 
-func findToken(pings <-chan string) {
+func findToken(pings <-chan string, id string) {
 	var swaps utils.Swaps
 	msg := <-pings
 	json.Unmarshal([]byte(msg), &swaps)
 	min, max, minTarget, maxTarget, minTime, maxTime := MinAndMax(swaps)
 
 	last := LastPrice(swaps)
-	// fmt.Println(msg)
+	fmt.Println(last)
 
 	ts, tl, period := PeriodOfSwaps(swaps)
-	if (max-min)/last > 0.01 && period < time.Duration(60*time.Minute) {
+	if (max-min)/last > 0.1 && period < time.Duration(60*time.Minute) {
 		fmt.Println("$$$$$ This is a tradable token! $$$$$")
+		fmt.Println("Token ID:", id)
+		fmt.Println("Token 0: ", swaps.Data.Swaps[0].Pair.Token0.Name)
+		fmt.Println("Token 1: ", swaps.Data.Swaps[0].Pair.Token1.Name)
 		fmt.Println("Last price: ", last)
 		fmt.Println("Min price: ", min, minTarget, minTime)
 		fmt.Println("Max price: ", max, maxTarget, maxTime)
@@ -117,10 +121,12 @@ func findToken(pings <-chan string) {
 	}
 }
 
-func TradableTokens(pairs utils.Pairs) {
-	c := make(chan string, 1)
+func TradableTokens(wg *sync.WaitGroup, pairs utils.Pairs) {
+	defer wg.Done()
+
 	for _, item := range pairs.Data.Pairs {
+		c := make(chan string, 1)
 		go utils.Post(c, "swaps", item.Id)
+		findToken(c, item.Id)
 	}
-	findToken(c)
 }

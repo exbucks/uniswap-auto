@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/hirokimoto/uniswap-auto/services"
@@ -15,28 +16,28 @@ func main() {
 	c3 := make(chan string)
 	c4 := make(chan string)
 
-	go func() {
-		for {
-			utils.Post(c1, "bundles", "")
-			time.Sleep(time.Second * 1)
-		}
-	}()
-	go func() {
-		for {
-			utils.Post(c2, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
-			time.Sleep(time.Second * 1)
-		}
-	}()
-	go func() {
-		for {
-			utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
-			time.Sleep(time.Second * 1)
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		utils.Post(c1, "bundles", "")
+	// 		time.Sleep(time.Second * 1)
+	// 	}
+	// }()
+	// go func() {
+	// 	for {
+	// 		utils.Post(c2, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
+	// 		time.Sleep(time.Second * 1)
+	// 	}
+	// }()
+	// go func() {
+	// 	for {
+	// 		utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
+	// 		time.Sleep(time.Second * 1)
+	// 	}
+	// }()
 	go func() {
 		for {
 			utils.Post(c4, "pairs", "")
-			time.Sleep(time.Second * 1)
+			time.Sleep(time.Second * 5)
 		}
 	}()
 
@@ -74,7 +75,11 @@ func main() {
 				}
 			case msg4 := <-c4:
 				json.Unmarshal([]byte(msg4), &pairs)
-				services.TradableTokens(pairs)
+
+				var wg sync.WaitGroup
+				wg.Add(len(pairs.Data.Pairs))
+				go services.TradableTokens(&wg, pairs)
+				wg.Wait()
 			}
 		}
 	}()

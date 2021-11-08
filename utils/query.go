@@ -35,10 +35,14 @@ type Swaps struct {
 			Id         string `json:"id"`
 			Pair       struct {
 				Token0 struct {
-					Symbol string `json:"symbol"`
+					Symbol     string `json:"symbol"`
+					Name       string `json:"name"`
+					DerivedETH string `json:"derivedETH"`
 				} `json:"token0"`
 				Token1 struct {
-					Symbol string `json:"symbol"`
+					Symbol     string `json:"symbol"`
+					Name       string `json:"name"`
+					DerivedETH string `json:"derivedETH"`
 				} `json:"token1"`
 			} `json:"pair"`
 			Timestamp string `json:"timestamp"`
@@ -98,9 +102,13 @@ func Query(target string, id string) map[string]string {
 					pair {
 						token0 {
 							symbol
+							name
+       						derivedETH
 						}
 						token1 {
 							symbol
+							name
+       						derivedETH
 						}
 					}
 					amount0In
