@@ -90,28 +90,28 @@ func findToken(pings <-chan string, id string) {
 	var swaps utils.Swaps
 	msg := <-pings
 	json.Unmarshal([]byte(msg), &swaps)
-	min, max, minTarget, maxTarget, minTime, maxTime := MinAndMax(swaps)
 
-	last := LastPrice(swaps)
-
-	_, _, period := PeriodOfSwaps(swaps)
-	if (max-min)/last > 0.1 && period < time.Duration(6*time.Hour) {
-		fmt.Println("$$$$$ This is a tradable token! $$$$$")
-		fmt.Println("Token ID:", id)
-		fmt.Println("Token 0: ", swaps.Data.Swaps[0].Pair.Token0.Name)
-		fmt.Println("Token 1: ", swaps.Data.Swaps[0].Pair.Token1.Name)
-		fmt.Println("Last price: ", last)
-		fmt.Println("Min price: ", min, minTarget, minTime)
-		fmt.Println("Max price: ", max, maxTarget, maxTime)
-		fmt.Println("Timeframe of 100 swaps: ", period)
-		status := maxTime.After(minTime)
-		if status {
-			fmt.Println("Status: Safe")
+	if len(swaps.Data.Swaps) > 0 {
+		min, max, minTarget, maxTarget, minTime, maxTime := MinAndMax(swaps)
+		last := LastPrice(swaps)
+		_, _, period := PeriodOfSwaps(swaps)
+		if (max-min)/last > 0.1 && period < time.Duration(6*time.Hour) {
+			fmt.Println("$$$$$ This is a tradable token! $$$$$")
+			fmt.Println("Token ID:", id)
+			fmt.Println("Pair: ", swaps.Data.Swaps[0].Pair.Token0.Name, " / ", swaps.Data.Swaps[0].Pair.Token1.Name)
+			fmt.Println("Last price: ", last)
+			fmt.Println("Min price: ", min, minTarget, minTime)
+			fmt.Println("Max price: ", max, maxTarget, maxTime)
+			fmt.Println("Timeframe of 100 swaps: ", period)
+			status := maxTime.After(minTime)
+			if status {
+				fmt.Println("Status: Safe")
+			} else {
+				fmt.Println("Status: Dagerous")
+			}
 		} else {
-			fmt.Println("Status: Dagerous")
+			fmt.Print(".")
 		}
-	} else {
-		fmt.Print(".")
 	}
 }
 
