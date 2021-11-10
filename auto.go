@@ -42,6 +42,18 @@ func trackSwap(pings <-chan string) {
 	}
 }
 
+func trackPairs(pings <-chan string) {
+	msg := <-pings
+	var pairs utils.Pairs
+
+	json.Unmarshal([]byte(msg), &pairs)
+
+	var wg sync.WaitGroup
+	wg.Add(len(pairs.Data.Pairs))
+	go services.TradableTokens(&wg, pairs)
+	wg.Wait()
+}
+
 func main() {
 	fmt.Println("Please select what you are going to do.")
 	t := prompt.Input("> ", completer)
@@ -86,9 +98,6 @@ func main() {
 				}
 			}
 		}()
-
-		var input string
-		fmt.Scanln(&input)
 	} else if t == "2." {
 		var pair string
 		fmt.Print("Please enter your token: ")
@@ -97,33 +106,22 @@ func main() {
 
 		go func() {
 			for {
-				fmt.Print(".")
 				c3 := make(chan string)
 				go utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
 				trackSwap(c3)
 			}
 		}()
-
-		var input string
-		fmt.Scanln(&input)
 	} else if t == "3." {
 		fmt.Println("hello, Yourself")
 	} else if t == "4." {
-		c4 := make(chan string)
-		var pairs utils.Pairs
-
 		go func() {
 			for {
-				utils.Post(c4, "pairs", "")
-
-				msg4 := <-c4
-				json.Unmarshal([]byte(msg4), &pairs)
-
-				var wg sync.WaitGroup
-				wg.Add(len(pairs.Data.Pairs))
-				go services.TradableTokens(&wg, pairs)
-				wg.Wait()
+				c4 := make(chan string)
+				go utils.Post(c4, "pairs", "")
+				trackPairs(c4)
 			}
 		}()
 	}
+	var input string
+	fmt.Scanln(&input)
 }
