@@ -78,7 +78,7 @@ func main() {
 		}()
 		go func() {
 			for {
-				utils.Post(c2, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
+				utils.Post(c2, "tokens", token)
 				time.Sleep(time.Second * 2)
 			}
 		}()
@@ -107,7 +107,7 @@ func main() {
 		go func() {
 			for {
 				c3 := make(chan string)
-				go utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
+				go utils.Post(c3, "swaps", pair)
 				trackSwap(c3)
 			}
 		}()
