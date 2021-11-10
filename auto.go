@@ -56,6 +56,10 @@ func trackPairs(pings <-chan string) {
 
 func main() {
 	fmt.Println("Please select what you are going to do.")
+	fmt.Println("1. Monitor the price of a token")
+	fmt.Println("2. Monitor a pair")
+	fmt.Println("3. Find stable pairs")
+	fmt.Println("4. Find tradable pairs")
 	t := prompt.Input("> ", completer)
 
 	if t == "1." {
@@ -100,9 +104,9 @@ func main() {
 		}()
 	} else if t == "2." {
 		var pair string
-		fmt.Print("Please enter your token: ")
+		fmt.Print("Please enter your pair: ")
 		fmt.Scanf("%s", &pair)
-		fmt.Println("Token address: ", pair)
+		fmt.Println("Pair address: ", pair)
 
 		go func() {
 			for {
