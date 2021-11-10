@@ -22,16 +22,34 @@ func completer(d prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 }
 
-func main() {
-	c1 := make(chan string)
-	c2 := make(chan string)
-	c3 := make(chan string)
-	c4 := make(chan string)
+func trackSwap(pings <-chan string) {
+	msg := <-pings
+	var swaps utils.Swaps
+	json.Unmarshal([]byte(msg), &swaps)
 
+	min, max, minTarget, maxTarget, minTime, maxTime := services.MinAndMax(swaps)
+	fmt.Println("Min price: ", min, minTarget, minTime)
+	fmt.Println("Max price: ", max, maxTarget, maxTime)
+
+	last := services.LastPrice(swaps)
+	fmt.Println("Last price: ", last)
+
+	ts, tl, period := services.PeriodOfSwaps(swaps)
+	fmt.Println("Timeframe of 100 swaps: ", period)
+	fmt.Println("Start and End time of the above time frame: ", ts, tl)
+	if (max-min)/last > 0.5 {
+		fmt.Println("$$$$$ This is a tradable token! $$$$$")
+	}
+}
+
+func main() {
 	fmt.Println("Please select what you are going to do.")
 	t := prompt.Input("> ", completer)
 
 	if t == "1." {
+		c1 := make(chan string)
+		c2 := make(chan string)
+
 		var token string
 		var eth utils.Crypto
 		var xi utils.Tokens
@@ -68,41 +86,37 @@ func main() {
 				}
 			}
 		}()
+
+		var input string
+		fmt.Scanln(&input)
 	} else if t == "2." {
-		fmt.Println("hello, Yourself")
+		var pair string
+		fmt.Print("Please enter your token: ")
+		fmt.Scanf("%s", &pair)
+		fmt.Println("Token address: ", pair)
+
+		go func() {
+			for {
+				fmt.Print(".")
+				c3 := make(chan string)
+				go utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
+				trackSwap(c3)
+			}
+		}()
+
+		var input string
+		fmt.Scanln(&input)
 	} else if t == "3." {
 		fmt.Println("hello, Yourself")
 	} else if t == "4." {
+		c4 := make(chan string)
+		var pairs utils.Pairs
+
 		go func() {
 			for {
 				utils.Post(c4, "pairs", "")
-			}
-		}()
-	}
 
-	var swaps utils.Swaps
-	var pairs utils.Pairs
-
-	go func() {
-		for {
-			select {
-			case msg3 := <-c3:
-				json.Unmarshal([]byte(msg3), &swaps)
-
-				min, max, minTarget, maxTarget, minTime, maxTime := services.MinAndMax(swaps)
-				fmt.Println("Min price: ", min, minTarget, minTime)
-				fmt.Println("Max price: ", max, maxTarget, maxTime)
-
-				last := services.LastPrice(swaps)
-				fmt.Println("Last price: ", last)
-
-				ts, tl, period := services.PeriodOfSwaps(swaps)
-				fmt.Println("Timeframe of 100 swaps: ", period)
-				fmt.Println("Start and End time of the above time frame: ", ts, tl)
-				if (max-min)/last > 0.5 {
-					fmt.Println("$$$$$ This is a tradable token! $$$$$")
-				}
-			case msg4 := <-c4:
+				msg4 := <-c4
 				json.Unmarshal([]byte(msg4), &pairs)
 
 				var wg sync.WaitGroup
@@ -110,9 +124,6 @@ func main() {
 				go services.TradableTokens(&wg, pairs)
 				wg.Wait()
 			}
-		}
-	}()
-
-	var input string
-	fmt.Scanln(&input)
+		}()
+	}
 }
