@@ -37,6 +37,40 @@ func priceOfSwap(swap utils.Swap) (price float64, target string) {
 	return price, target
 }
 
+func printInfo(id string, status string, min float64, max float64, minTarget string, maxTarget string, minTime time.Time, maxTime time.Time, period time.Duration) {
+	fmt.Println()
+	fmt.Println("Token ID: ", id)
+	fmt.Println("Status: ", status)
+	fmt.Println("Min price: ", min, minTarget, minTime)
+	fmt.Println("Max price: ", max, maxTarget, maxTime)
+	fmt.Println("Time Frame: ", period)
+}
+
+func findToken(pings <-chan string, id string) {
+	var swaps utils.Swaps
+	msg := <-pings
+	json.Unmarshal([]byte(msg), &swaps)
+
+	if len(swaps.Data.Swaps) > 0 {
+		min, max, minTarget, maxTarget, minTime, maxTime := MinAndMax(swaps)
+		last := LastPrice(swaps)
+		_, _, period := PeriodOfSwaps(swaps)
+		gap := PeriodOfGap(swaps)
+
+		if gap < time.Duration(3*time.Hour) {
+			if (max-min)/last > 0.1 && period < time.Duration(6*time.Hour) {
+				showNotification("Tradable", id)
+				printInfo(id, "Tradable", min, max, minTarget, maxTarget, minTime, maxTime, period)
+			} else if (max-min)/last < 0.1 && period > time.Duration(24*time.Hour) {
+				showNotification("Stable", id)
+				printInfo(id, "Stable", min, max, minTarget, maxTarget, minTime, maxTime, period)
+			} else {
+				fmt.Print(".")
+			}
+		}
+	}
+}
+
 func Price(eth utils.Crypto, tokens utils.Tokens) (price float64) {
 	if eth.Data.Bundles != nil && tokens.Data.Tokens != nil {
 		unit, _ := strconv.ParseFloat(eth.Data.Bundles[0].EthPrice, 32)
@@ -95,33 +129,12 @@ func PeriodOfSwaps(swaps utils.Swaps) (time.Time, time.Time, time.Duration) {
 	return tl, tf, period
 }
 
-func findToken(pings <-chan string, id string) {
-	var swaps utils.Swaps
-	msg := <-pings
-	json.Unmarshal([]byte(msg), &swaps)
-
-	if len(swaps.Data.Swaps) > 0 {
-		min, max, minTarget, maxTarget, minTime, maxTime := MinAndMax(swaps)
-		last := LastPrice(swaps)
-		_, _, period := PeriodOfSwaps(swaps)
-		if (max-min)/last > 0.1 && period < time.Duration(6*time.Hour) {
-			showNotification("Tradable", id)
-			fmt.Println("Tradable")
-			fmt.Println("Token ID: ", id)
-			fmt.Println("Min price: ", min, minTarget, minTime)
-			fmt.Println("Max price: ", max, maxTarget, maxTime)
-			fmt.Println("Time Frame: ", period)
-		} else if (max-min)/last < 0.1 && period > time.Duration(24*7*time.Hour) {
-			showNotification("Stable", id)
-			fmt.Println("Stable")
-			fmt.Println("Token ID: ", id)
-			fmt.Println("Min price: ", min, minTarget, minTime)
-			fmt.Println("Max price: ", max, maxTarget, maxTime)
-			fmt.Println("Time Frame: ", period)
-		} else {
-			fmt.Print(".")
-		}
-	}
+func PeriodOfGap(swaps utils.Swaps) time.Duration {
+	latest, _ := strconv.ParseInt(swaps.Data.Swaps[0].Timestamp, 10, 64)
+	end := time.Unix(latest, 0)
+	now := time.Now()
+	period := now.Sub(end)
+	return period
 }
 
 func TradableTokens(wg *sync.WaitGroup, pairs utils.Pairs) {
