@@ -3,11 +3,25 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
+	"time"
+
+	"github.com/c-bata/go-prompt"
 
 	"github.com/hirokimoto/uniswap-auto/services"
 	"github.com/hirokimoto/uniswap-auto/utils"
 )
+
+func completer(d prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "1.", Description: " Track price of a token"},
+		{Text: "2.", Description: " Track the token if it is tradable now"},
+		{Text: "3.", Description: " Find a token which is a stable"},
+		{Text: "4.", Description: " Find a tradable token"},
+	}
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+}
 
 func main() {
 	c1 := make(chan string)
@@ -15,29 +29,42 @@ func main() {
 	c3 := make(chan string)
 	c4 := make(chan string)
 
-	// go func() {
-	// 	for {
-	// 		utils.Post(c1, "bundles", "")
-	// 		time.Sleep(time.Second * 1)
-	// 	}
-	// }()
-	// go func() {
-	// 	for {
-	// 		utils.Post(c2, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
-	// 		time.Sleep(time.Second * 1)
-	// 	}
-	// }()
-	// go func() {
-	// 	for {
-	// 		utils.Post(c3, "swaps", "0x7a99822968410431edd1ee75dab78866e31caf39")
-	// 		time.Sleep(time.Second * 1)
-	// 	}
-	// }()
-	go func() {
-		for {
-			utils.Post(c4, "pairs", "")
+	fmt.Println("Please select what you are going to do.")
+	t := prompt.Input("> ", completer)
+
+	if t == "1." {
+		var token string
+		fmt.Print("Please enter your token: ")
+		fmt.Scanf("%s", &token)
+		fmt.Println("Hello", token)
+
+		go func() {
+			for {
+				utils.Post(c1, "bundles", "")
+				time.Sleep(time.Second * 2)
+			}
+		}()
+		go func() {
+			for {
+				utils.Post(c2, "tokens", "0x295b42684f90c77da7ea46336001010f2791ec8c")
+				time.Sleep(time.Second * 2)
+			}
+		}()
+
+		if strings.Compare("hi", token) == 0 {
+			fmt.Println("hello, Yourself")
 		}
-	}()
+	} else if t == "2." {
+		fmt.Println("hello, Yourself")
+	} else if t == "3." {
+		fmt.Println("hello, Yourself")
+	} else if t == "4." {
+		go func() {
+			for {
+				utils.Post(c4, "pairs", "")
+			}
+		}()
+	}
 
 	var eth utils.Crypto
 	var xi utils.Tokens
