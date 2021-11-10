@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -34,9 +33,12 @@ func main() {
 
 	if t == "1." {
 		var token string
+		var eth utils.Crypto
+		var xi utils.Tokens
+
 		fmt.Print("Please enter your token: ")
 		fmt.Scanf("%s", &token)
-		fmt.Println("Hello", token)
+		fmt.Println("Token address: ", token)
 
 		go func() {
 			for {
@@ -51,9 +53,21 @@ func main() {
 			}
 		}()
 
-		if strings.Compare("hi", token) == 0 {
-			fmt.Println("hello, Yourself")
-		}
+		go func() {
+			for {
+				select {
+				case msg1 := <-c1:
+					json.Unmarshal([]byte(msg1), &eth)
+					price := services.Price(eth, xi)
+					fmt.Println("Current price: ", price)
+				case msg2 := <-c2:
+					json.Unmarshal([]byte(msg2), &xi)
+					price := services.Price(eth, xi)
+					fmt.Println("Current price: ", price)
+
+				}
+			}
+		}()
 	} else if t == "2." {
 		fmt.Println("hello, Yourself")
 	} else if t == "3." {
@@ -66,22 +80,12 @@ func main() {
 		}()
 	}
 
-	var eth utils.Crypto
-	var xi utils.Tokens
 	var swaps utils.Swaps
 	var pairs utils.Pairs
 
 	go func() {
 		for {
 			select {
-			case msg1 := <-c1:
-				json.Unmarshal([]byte(msg1), &eth)
-				price := services.Price(eth, xi)
-				fmt.Println("Current price: ", price)
-			case msg2 := <-c2:
-				json.Unmarshal([]byte(msg2), &xi)
-				price := services.Price(eth, xi)
-				fmt.Println("Current price: ", price)
 			case msg3 := <-c3:
 				json.Unmarshal([]byte(msg3), &swaps)
 

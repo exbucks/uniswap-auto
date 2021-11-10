@@ -85,7 +85,7 @@ func Query(target string, id string) map[string]string {
 	case "tokens":
 		sub := fmt.Sprintf(`
 			query tokens {
-				tokens(where: { id: %s }) {
+				tokens(where: { id: "%s" }) {
 					id
 					name
 					symbol
